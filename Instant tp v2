@@ -1,0 +1,132 @@
+-- [[ WHITELIST CONFIGURATION ]] --
+local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762"}
+local lp = game:GetService("Players").LocalPlayer
+local isWhitelisted = false
+
+-- Case-insensitive check
+for _, name in ipairs(allowedNames) do
+    if lp.Name:lower() == name:lower() then
+        isWhitelisted = true
+        break
+    end
+end
+
+-- Kick if not on the list
+if not isWhitelisted then
+    lp:Kick("You are not whitelisted buy the script")
+    return
+end
+
+-- [[ AUTO EXECUTE DESYNC SCRIPT ]] --
+-- Loads and runs the Chilli desync script immediately
+spawn(function()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+    end)
+    if not success then
+        warn("Failed to load Chilli desync script: " .. tostring(err))
+    end
+end)
+
+-- [[ UI SETUP ]] --
+local parentContainer = game:GetService("CoreGui")
+-- Fallback to PlayerGui if CoreGui is restricted
+local success, _ = pcall(function() local t = game:GetService("CoreGui").Name end)
+if not success then parentContainer = lp:WaitForChild("PlayerGui") end
+
+if parentContainer:FindFirstChild("YngScriptUI") then 
+    parentContainer.YngScriptUI:Destroy() 
+end
+
+local g = Instance.new("ScreenGui")
+g.Name = "YngScriptUI"
+g.ResetOnSpawn = false
+g.Parent = parentContainer
+
+-- Original File Settings
+local wavepoint = CFrame.new(-363.87, -2.71, 104.71)
+local orb = nil
+
+-- Main Frame
+local f = Instance.new("Frame", g)
+f.Size = UDim2.new(0, 260, 0, 190)
+f.Position = UDim2.new(0.5, -130, 0.5, -95)
+f.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+f.Active = true
+f.Draggable = true
+Instance.new("UICorner", f).CornerRadius = UDim.new(0, 12)
+Instance.new("UIStroke", f).Color = Color3.fromRGB(0, 255, 0)
+
+-- Title
+local l = Instance.new("TextLabel", f)
+l.Size = UDim2.new(1, 0, 0, 35)
+l.BackgroundTransparency = 1
+l.Text = "YNG SCRIPTS"
+l.Font = Enum.Font.GothamBold
+l.TextSize = 18
+l.TextColor3 = Color3.fromRGB(0, 255, 0)
+
+-- Progress Bar
+local barBg = Instance.new("Frame", f)
+barBg.Size = UDim2.new(0.88, 0, 0, 18)
+barBg.Position = UDim2.new(0.06, 0, 0, 65)
+barBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", barBg).CornerRadius = UDim.new(0, 8)
+
+local barFill = Instance.new("Frame", barBg)
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 8)
+
+-- Status Text
+local progText = Instance.new("TextLabel", f)
+progText.Size = UDim2.new(1, 0, 0, 22)
+progText.Position = UDim2.new(0, 0, 0, 88)
+progText.BackgroundTransparency = 1
+progText.Text = "Listening..."
+progText.TextColor3 = Color3.fromRGB(200, 200, 200)
+progText.Font = Enum.Font.Gotham
+
+-- Set Wavepoint Button
+local setBtn = Instance.new("TextButton", f)
+setBtn.Size = UDim2.new(0.88, 0, 0, 25)
+setBtn.Position = UDim2.new(0.06, 0, 0, 142)
+setBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+setBtn.Text = "Set Wavepoint"
+setBtn.Font = Enum.Font.GothamBold
+setBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", setBtn).CornerRadius = UDim.new(0, 6)
+
+-- Set Wavepoint Logic
+setBtn.MouseButton1Click:Connect(function()
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        wavepoint = lp.Character.HumanoidRootPart.CFrame
+        if orb then orb:Destroy() end
+        orb = Instance.new("Part", workspace)
+        orb.Shape = Enum.PartType.Ball
+        orb.Size = Vector3.new(1.5, 1.5, 1.5)
+        orb.Material = Enum.Material.Neon
+        orb.Color = Color3.fromRGB(0, 255, 0)
+        orb.Anchored = true
+        orb.CanCollide = false
+        orb.Position = wavepoint.Position + Vector3.new(0, 2, 0)
+    end
+end)
+
+-- Teleport Logic
+game:GetService("ProximityPromptService").PromptTriggered:Connect(function(prompt, player)
+    if player == lp and lp.Character then
+        lp.Character.HumanoidRootPart.CFrame = wavepoint
+        progText.Text = "Teleported!"
+        task.delay(2, function() progText.Text = "Listening..." end)
+    end
+end)
+
+-- Anti-Stun / No Animation
+local function clearAnims()
+    local char = lp.Character or lp.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    if hum:FindFirstChild("Animator") then hum.Animator:Destroy() end
+end
+clearAnims()
+lp.CharacterAdded:Connect(clearAnims)
