@@ -1,21 +1,21 @@
 -- [[ WHITELIST CONFIGURATION ]] --
-local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762", "Xiviikz"}
+local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762"}
 local lp = game:GetService("Players").LocalPlayer
 local isWhitelisted = false
--- Case-insensitive check
+
 for _, name in ipairs(allowedNames) do
     if lp.Name:lower() == name:lower() then
         isWhitelisted = true
         break
     end
 end
--- Kick if not on the list
+
 if not isWhitelisted then
     lp:Kick("You are not whitelisted buy the script")
     return
 end
+
 -- [[ AUTO EXECUTE DESYNC SCRIPT ]] --
--- Loads and runs the Chilli desync script immediately
 spawn(function()
     local success, err = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
@@ -24,88 +24,235 @@ spawn(function()
         warn("Failed to load Chilli desync script: " .. tostring(err))
     end
 end)
+
+-- [[ SERVICES ]] --
+local TweenService = game:GetService("TweenService")
+local PPS = game:GetService("ProximityPromptService")
+
 -- [[ UI SETUP ]] --
 local parentContainer = game:GetService("CoreGui")
--- Fallback to PlayerGui if CoreGui is restricted
 local success, _ = pcall(function() local t = game:GetService("CoreGui").Name end)
 if not success then parentContainer = lp:WaitForChild("PlayerGui") end
-if parentContainer:FindFirstChild("YngScriptUI") then
-    parentContainer.YngScriptUI:Destroy()
+
+if parentContainer:FindFirstChild("YngScriptUI") then 
+    parentContainer.YngScriptUI:Destroy() 
 end
+
 local g = Instance.new("ScreenGui")
 g.Name = "YngScriptUI"
 g.ResetOnSpawn = false
 g.Parent = parentContainer
--- Original File Settings
+
 local wavepoint = CFrame.new(-363.87, -2.71, 104.71)
 local orb = nil
--- Main Frame
+
+-- Main Frame (Smaller & Green/Black Theme)
 local f = Instance.new("Frame", g)
-f.Size = UDim2.new(0, 260, 0, 190)
-f.Position = UDim2.new(0.5, -130, 0.5, -95)
-f.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+f.Size = UDim2.new(0, 260, 0, 240)
+f.Position = UDim2.new(0.5, -130, 0.5, -120)
+f.BackgroundColor3 = Color3.fromRGB(10, 30, 10)  -- Deep green
+f.BackgroundTransparency = 0.15
 f.Active = true
 f.Draggable = true
-Instance.new("UICorner", f).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", f).Color = Color3.fromRGB(0, 255, 0)
--- Title
-local l = Instance.new("TextLabel", f)
-l.Size = UDim2.new(1, 0, 0, 35)
-l.BackgroundTransparency = 1
-l.Text = "YNG SCRIPTS"
-l.Font = Enum.Font.GothamBold
-l.TextSize = 18
-l.TextColor3 = Color3.fromRGB(0, 255, 0)
--- Progress Bar
-local barBg = Instance.new("Frame", f)
-barBg.Size = UDim2.new(0.88, 0, 0, 18)
-barBg.Position = UDim2.new(0.06, 0, 0, 65)
-barBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", barBg).CornerRadius = UDim.new(0, 8)
-local barFill = Instance.new("Frame", barBg)
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 8)
+
+local mainCorner = Instance.new("UICorner", f)
+mainCorner.CornerRadius = UDim.new(0, 12)
+
+local mainStroke = Instance.new("UIStroke", f)
+mainStroke.Color = Color3.fromRGB(0, 255, 100)
+mainStroke.Thickness = 2
+
+-- Title Bar - Green Gradient
+local titleBar = Instance.new("Frame", f)
+titleBar.Size = UDim2.new(1, 0, 0, 42)
+titleBar.BackgroundTransparency = 0
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
+
+local titleGrad = Instance.new("UIGradient", titleBar)
+titleGrad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 220, 80)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 160, 50))
+}
+
+local title = Instance.new("TextLabel", titleBar)
+title.Size = UDim2.new(1, -10, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "YNG SCRIPTS"
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 20
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextXAlignment = Enum.TextXAlignment.Left
+
 -- Status Text
-local progText = Instance.new("TextLabel", f)
-progText.Size = UDim2.new(1, 0, 0, 22)
-progText.Position = UDim2.new(0, 0, 0, 88)
-progText.BackgroundTransparency = 1
-progText.Text = "Listening..."
-progText.TextColor3 = Color3.fromRGB(200, 200, 200)
-progText.Font = Enum.Font.Gotham
--- Set Wavepoint Button
-local setBtn = Instance.new("TextButton", f)
-setBtn.Size = UDim2.new(0.88, 0, 0, 25)
-setBtn.Position = UDim2.new(0.06, 0, 0, 142)
-setBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-setBtn.Text = "Set Wavepoint"
-setBtn.Font = Enum.Font.GothamBold
-setBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", setBtn).CornerRadius = UDim.new(0, 6)
--- Set Wavepoint Logic
+local statusText = Instance.new("TextLabel", f)
+statusText.Size = UDim2.new(0.9, 0, 0, 32)
+statusText.Position = UDim2.new(0.05, 0, 0, 52)
+statusText.BackgroundTransparency = 1
+statusText.Text = "Listening..."
+statusText.TextColor3 = Color3.fromRGB(200, 255, 200)
+statusText.Font = Enum.Font.GothamBold
+statusText.TextSize = 18
+
+-- Button Creator (Green/Black Style)
+local function createButton(text, posY)
+    local btn = Instance.new("TextButton", f)
+    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.Position = UDim2.new(0.05, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(15, 50, 15)  -- Dark green
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.TextSize = 16
+    btn.AutoButtonColor = false
+
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 9)
+    
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = Color3.fromRGB(0, 200, 80)
+    stroke.Thickness = 1.8
+
+    -- Hover Effect
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(0, 180, 60)
+        }):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0.92, 0, 0, 42)}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(15, 50, 15)
+        }):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0.9, 0, 0, 40)}):Play()
+    end)
+
+    return btn
+end
+
+-- Buttons
+local setBtn = createButton("Set Wavepoint", 95)
+local equipBtn = createButton("Equip Fly Tool", 145)
+
+-- Close Button
+local closeBtn = Instance.new("TextButton", titleBar)
+closeBtn.Size = UDim2.new(0, 36, 0, 36)
+closeBtn.Position = UDim2.new(1, -40, 0, 3)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 9)
+
+-- Reopen Button
+local reopenBtn = Instance.new("TextButton", g)
+reopenBtn.Size = UDim2.new(0, 130, 0, 42)
+reopenBtn.Position = UDim2.new(1, -140, 0, 15)
+reopenBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 60)
+reopenBtn.Text = "YNG SCRIPTS"
+reopenBtn.TextColor3 = Color3.new(1, 1, 1)
+reopenBtn.Font = Enum.Font.GothamBold
+reopenBtn.TextSize = 17
+reopenBtn.Visible = false
+Instance.new("UICorner", reopenBtn).CornerRadius = UDim.new(0, 10)
+local reopenStroke = Instance.new("UIStroke", reopenBtn)
+reopenStroke.Color = Color3.fromRGB(0, 255, 100)
+reopenStroke.Thickness = 2
+
+-- UI Toggle
+local function showUI()
+    f.Visible = true
+    reopenBtn.Visible = false
+    statusText.Text = "Listening..."
+end
+local function hideUI()
+    f.Visible = false
+    reopenBtn.Visible = true
+end
+closeBtn.MouseButton1Click:Connect(hideUI)
+reopenBtn.MouseButton1Click:Connect(showUI)
+
+-- Set Wavepoint
 setBtn.MouseButton1Click:Connect(function()
     if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
         wavepoint = lp.Character.HumanoidRootPart.CFrame
         if orb then orb:Destroy() end
         orb = Instance.new("Part", workspace)
         orb.Shape = Enum.PartType.Ball
-        orb.Size = Vector3.new(1.5, 1.5, 1.5)
+        orb.Size = Vector3.new(2, 2, 2)
         orb.Material = Enum.Material.Neon
-        orb.Color = Color3.fromRGB(0, 255, 0)
+        orb.Color = Color3.fromRGB(0, 255, 100)
         orb.Anchored = true
         orb.CanCollide = false
-        orb.Position = wavepoint.Position + Vector3.new(0, 2, 0)
+        orb.Position = wavepoint.Position + Vector3.new(0, 3, 0)
+        
+        statusText.Text = "Wavepoint Set!"
+        task.delay(2, function()
+            if statusText.Text == "Wavepoint Set!" then
+                statusText.Text = "Listening..."
+            end
+        end)
     end
 end)
--- Teleport Logic
-game:GetService("ProximityPromptService").PromptTriggered:Connect(function(prompt, player)
-    if player == lp and lp.Character then
+
+-- Equip Fly Tool
+equipBtn.MouseButton1Click:Connect(function()
+    local char = lp.Character or lp.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid")
+    local backpack = lp:WaitForChild("Backpack")
+    
+    local flyToolNames = {
+        "magic carpet", "rainbow magic carpet", "deluxe rainbow magic carpet",
+        "flying carpet", "carpet", "broom", "broomstick", 
+        "magic broom", "magic broomstick", "flying broom", "fly tool"
+    }
+    
+    local toolToEquip = nil
+    
+    for _, tool in pairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            for _, name in ipairs(flyToolNames) do
+                if tool.Name:lower():find(name) then
+                    toolToEquip = tool
+                    break
+                end
+            end
+            if toolToEquip then break end
+        end
+    end
+    
+    if toolToEquip then
+        toolToEquip.Parent = char
+        humanoid:EquipTool(toolToEquip)
+        statusText.Text = "Equipped: " .. toolToEquip.Name
+        task.delay(3, function()
+            if statusText.Text:find("Equipped") then
+                statusText.Text = "Listening..."
+            end
+        end)
+    else
+        statusText.Text = "No fly tool found!"
+        task.delay(3, function()
+            if statusText.Text == "No fly tool found!" then
+                statusText.Text = "Listening..."
+            end
+        end)
+    end
+end)
+
+-- Teleport on ANY ProximityPrompt
+PPS.PromptTriggered:Connect(function(prompt, player)
+    if player == lp and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
         lp.Character.HumanoidRootPart.CFrame = wavepoint
-        progText.Text = "Teleported!"
-        task.delay(2, function() progText.Text = "Listening..." end)
+        statusText.Text = "Teleported!"
+        task.delay(1.5, function()
+            if statusText.Text == "Teleported!" then
+                statusText.Text = "Listening..."
+            end
+        end)
     end
 end)
+
 -- Anti-Stun / No Animation
 local function clearAnims()
     local char = lp.Character or lp.CharacterAdded:Wait()
