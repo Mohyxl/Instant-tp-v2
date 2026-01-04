@@ -1,5 +1,5 @@
 -- [[ WHITELIST CONFIGURATION ]] --
-local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762"}
+local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762", "Xiviikz"}
 local lp = game:GetService("Players").LocalPlayer
 local isWhitelisted = false
 
