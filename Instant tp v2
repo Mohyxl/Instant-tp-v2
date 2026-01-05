@@ -1,8 +1,18 @@
--- [[ WHITELIST CONFIGURATION ]] --
-local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762", "Xiviikz"}
+-- [[ WHITELIST & BAN CONFIGURATION ]] --
+local bannedNames = {"Xiviikz"}  -- Banned users (add more here if needed)
+local allowedNames = {"Averynj22", "moh118454", "mohyxlgaming", "ege_76762"}
 local lp = game:GetService("Players").LocalPlayer
-local isWhitelisted = false
 
+-- Check for banned users first
+for _, name in ipairs(bannedNames) do
+    if lp.Name:lower() == name:lower() then
+        lp:Kick("You are officially banned from using this script")
+        return
+    end
+end
+
+-- Normal whitelist check
+local isWhitelisted = false
 for _, name in ipairs(allowedNames) do
     if lp.Name:lower() == name:lower() then
         isWhitelisted = true
@@ -46,11 +56,11 @@ g.Parent = parentContainer
 local wavepoint = CFrame.new(-363.87, -2.71, 104.71)
 local orb = nil
 
--- Main Frame (Smaller & Green/Black Theme)
+-- Main Frame
 local f = Instance.new("Frame", g)
 f.Size = UDim2.new(0, 260, 0, 240)
 f.Position = UDim2.new(0.5, -130, 0.5, -120)
-f.BackgroundColor3 = Color3.fromRGB(10, 30, 10)  -- Deep green
+f.BackgroundColor3 = Color3.fromRGB(10, 30, 10)
 f.BackgroundTransparency = 0.15
 f.Active = true
 f.Draggable = true
@@ -62,7 +72,7 @@ local mainStroke = Instance.new("UIStroke", f)
 mainStroke.Color = Color3.fromRGB(0, 255, 100)
 mainStroke.Thickness = 2
 
--- Title Bar - Green Gradient
+-- Title Bar
 local titleBar = Instance.new("Frame", f)
 titleBar.Size = UDim2.new(1, 0, 0, 42)
 titleBar.BackgroundTransparency = 0
@@ -94,12 +104,12 @@ statusText.TextColor3 = Color3.fromRGB(200, 255, 200)
 statusText.Font = Enum.Font.GothamBold
 statusText.TextSize = 18
 
--- Button Creator (Green/Black Style)
+-- Button Creator
 local function createButton(text, posY)
     local btn = Instance.new("TextButton", f)
     btn.Size = UDim2.new(0.9, 0, 0, 40)
     btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(15, 50, 15)  -- Dark green
+    btn.BackgroundColor3 = Color3.fromRGB(15, 50, 15)
     btn.Text = text
     btn.Font = Enum.Font.GothamBold
     btn.TextColor3 = Color3.new(1, 1, 1)
@@ -112,7 +122,6 @@ local function createButton(text, posY)
     stroke.Color = Color3.fromRGB(0, 200, 80)
     stroke.Thickness = 1.8
 
-    -- Hover Effect
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.2), {
             BackgroundColor3 = Color3.fromRGB(0, 180, 60)
